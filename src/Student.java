@@ -11,19 +11,6 @@ public class Student {
 
 	}
 
-	@Override
-	public int hashCode() {
-		return name.hashCode() + grade;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof Student) {
-			Student other = (Student) obj;
-			return name.compareTo(other.name) == 0 && grade == other.grade;
-		}
-		return false;
-	}
 
 	@Override
 	public String toString() {

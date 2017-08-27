@@ -12,21 +12,23 @@ public class ConsoleView implements IView {
 	@Override
 	public void init() {
 		welcomeMessage();
-		String option = getOption();
 		Scanner s = new Scanner(System.in);
-		while (option.compareToIgnoreCase(Controller.END_EVENT)) {
+		String option = "";
+		while (option.compareToIgnoreCase(Controller.END_EVENT) != 0) {
+			option = s.nextLine();
 			String[] args = option.split(" ");
-			proccessEvent(this, args);
+			proccessEvent(args);
 		}
 		s.close();
 	}
 
 	private void proccessEvent(String[] args) {
+		System.out.println("view proccessEvent: args.length = " + args.length);
 		this.args = new String[args.length - 1];
 		for (int i = 1; i < args.length; i++) {
 			this.args[i - 1] = args[i];
 		}
-
+		System.out.println("view proccessEvent: this.args.length = " + this.args.length);
 		for (ActionListener listener : listeners) {
 			listener.actionPerformed(new ActionEvent(this, -1, args[0]));
 		}
@@ -72,6 +74,18 @@ public class ConsoleView implements IView {
 
 	@Override
 	public void showData() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public String[] getArgs() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void onError(Exception e) {
 		// TODO Auto-generated method stub
 
 	}

@@ -1,9 +1,12 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -15,6 +18,8 @@ import java.util.Map.Entry;
 public class Model {
 
 	private ArrayList<Student> list;
+	private ArrayList<ActionListener> listeners = new ArrayList<ActionListener>();
+	private CollectionHolder collectionsHolder = new CollectionHolder();
 
 	public Model() {
 		list = new ArrayList<Student>();
@@ -41,7 +46,12 @@ public class Model {
 		return map;
 	}
 
-	public void printSortCountSameStudents(Map<Student, Integer> map) {
+	
+	public Set getCountSameStudentsSet() {
+		return collectionsHolder.sameStudentsSet;
+	}
+	
+	public void sortCountSameStudents(Map<Student, Integer> map) {
 		//
 		Comparator<StudentDecorator> comparator = new Comparator<StudentDecorator>() {
 			@Override
@@ -58,13 +68,16 @@ public class Model {
 		}
 
 		for (StudentDecorator studentDecorator : set) {
-			System.out.println(studentDecorator);
+			// System.out.println(studentDecorator);
+			collectionsHolder.sameStudentsSet
+					.add(studentDecorator.getStudent());
 		}
 		//
 	}
-
-	public void printSortStringLengthCountNoDupsByField(
-			ArrayList<Student> list, String field) {
+	public Map<String, Integer> getSortedByStringLengthMap() {
+		return collectionsHolder.stringLengthCountMap;
+	}
+	public void printSortStringLengthCountNoDupsByField(String field) {
 
 		Comparator<String> comparator = new Comparator<String>() {
 
@@ -104,11 +117,15 @@ public class Model {
 		}
 
 		for (Entry<String, Integer> entry : map.entrySet()) {
-			System.out.println(entry.getKey() + " : " + entry.getValue());
+			// System.out.println(entry.getKey() + " : " + entry.getValue());
+			collectionsHolder.stringLengthCountMap.put(entry.getKey(),
+					entry.getValue());
 		}
 
 	}
-
+	public Map<String, Integer> getCountedByOccurencesMap() {
+		return collectionsHolder.countOccurencesByOrderAndFieldMap;
+	}
 	public void printCountOccurencesSortByCount(ArrayList<Student> list,
 			String field, int order) {
 
@@ -153,11 +170,15 @@ public class Model {
 			// System.out.println(entry.getKey() + " : " + entry.getValue());
 		}
 		for (Entry<String, Integer> entry : ts) {
-			System.out.println(entry.getKey() + " : " + entry.getValue());
+			// System.out.println(entry.getKey() + " : " + entry.getValue());
+			collectionsHolder.countOccurencesByOrderAndFieldMap.put(
+					entry.getKey(), entry.getValue());
 		}
 
 	}
-
+	public List<Student> getReveresedList() {
+		return collectionsHolder.reversedList;
+	}
 	public void printReverse(String field) {
 
 		Stack<Student> stack = new Stack<Student>();
@@ -166,12 +187,16 @@ public class Model {
 			stack.push(student);
 		}
 		while (!stack.empty()) {
-			System.out.println(stack.pop());
+			// System.out.println(stack.pop());
+			collectionsHolder.reversedList.add(stack.pop());
 		}
 
 	}
 
-	public void printCountNoDupsByField(ArrayList<Student> list, String field) {
+	public List<Student> getCountedByFieldNoDupsSet() {
+		return collectionsHolder.reversedList;
+	}
+	public void createCountedNoDupsByField(String field) {
 		Map<String, Integer> map = new HashMap<String, Integer>();
 
 		for (Student student : list) {
@@ -197,13 +222,16 @@ public class Model {
 		}
 
 		for (Entry<String, Integer> entry : map.entrySet()) {
-			System.out.println(entry.getKey() + " : " + entry.getValue());
+			// System.out.println(entry.getKey() + " : " + entry.getValue());
+			collectionsHolder.noDupsByFieldCountMap.put(entry.getKey(),
+					entry.getValue());
 		}
 
 	}
-
-	public void printSortCountNoDupsByField(ArrayList<Student> list,
-			String field) {
+	public Map<String, Integer> getSortedByCountByFieldNoDupsSet() {
+		return collectionsHolder.sortedNoDupsByFieldCountMap;
+	}
+	public void printSortCountNoDupsByField(String field) {
 		Map<String, Integer> map = new TreeMap<String, Integer>();
 
 		for (Student student : list) {
@@ -227,14 +255,16 @@ public class Model {
 				map.put(string, count + 1);
 			}
 		}
-
-		for (Entry<String, Integer> entry : map.entrySet()) {
-			System.out.println(entry.getKey() + " : " + entry.getValue());
-		}
+		collectionsHolder.sortedNoDupsByFieldCountMap = map;
+//		for (Entry<String, Integer> entry : map.entrySet()) {
+			// System.out.println(entry.getKey() + " : " + entry.getValue());
+//			collectionsHolder.sortedNoDupsByFieldCountMap.put(entry.getKey(),
+//					entry.getValue());
+//		}
 
 	}
 
-	public void printNoDupsByField( String field) {
+	public void printNoDupsByField(String field) {
 		Set<String> set = new HashSet<String>();
 
 		for (Student student : list) {
@@ -252,7 +282,8 @@ public class Model {
 		}
 
 		for (String string : set) {
-			System.out.println(string);
+			// System.out.println(string);
+			collectionsHolder.noDupsByFieldSet.add(string);
 		}
 
 	}
@@ -273,9 +304,9 @@ public class Model {
 			}
 
 		}
-		for (String string : set) {
-			System.out.println(string);
-		}
+		collectionsHolder.sortedNoDupsByFieldSet = set;
+		proccessEvent(Controller.MODEL_UPDATED_EVENT);
+
 	}
 
 	public void readStudents() throws FileNotFoundException {
@@ -295,6 +326,39 @@ public class Model {
 		if (s != null) {
 			s.close();
 		}
+
+		collectionsHolder.mainList = list;
+		
+		proccessEvent(Controller.MODEL_UPDATED_EVENT);
+	}
+
+	private void proccessEvent(String event) {
+		System.out.println("model proccessEvent: ");
+
+		for (ActionListener listener : listeners) {
+			listener.actionPerformed(new ActionEvent(this, -1, event));
+		}
+	}
+
+	public void registerListener(ActionListener listener) {
+		this.listeners.add(listener);
+
+	}
+
+	class CollectionHolder {
+		public Map<String, Integer> countOccurencesByOrderAndFieldMap = new HashMap<String, Integer>();
+		public Map<String, Integer> stringLengthCountMap = new HashMap<String, Integer>();
+		public Map<String, Integer> noDupsByFieldCountMap = new HashMap<String, Integer>();
+		public Map<String, Integer> sortedNoDupsByFieldCountMap = new HashMap<String, Integer>();
+		public ArrayList<Student> mainList = new ArrayList<Student>();
+		public Set<Student> sameStudentsSet = new HashSet<Student>();
+		public Set<String> sortedNoDupsByFieldSet = new HashSet<String>();
+		public Set<String> noDupsByFieldSet = new HashSet<String>();
+		public ArrayList<Student> reversedList = new ArrayList<Student>();
+	
+		
+		
+		
 
 	}
 

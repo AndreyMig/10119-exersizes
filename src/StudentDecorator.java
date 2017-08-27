@@ -37,4 +37,8 @@ public class StudentDecorator {
 		}
 		return false;
 	}
+
+	public Student getStudent() {
+		return student;
+	}
 }
